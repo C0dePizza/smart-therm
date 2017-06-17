@@ -9,7 +9,6 @@ class HvacInterface {
       return g;
     });
     this.status = 'idle';
-    // heat, cool, fan
   }
   writeOuts(vals) {
     for (var i = 0; i < this.outs.length; i++) {

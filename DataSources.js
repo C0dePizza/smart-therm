@@ -1,4 +1,4 @@
-const Forecast = require('forecast');
+const request = require('request');
 
 class ThermostatSource {
   constructor(thermostat) {
@@ -6,11 +6,12 @@ class ThermostatSource {
   }
   query(cb) {
     cb({
-      targetTemp: this.thermostat.target;
+      targetTemp: this.thermostat.target,
+      mode: this.thermostat.mode
     });
   }
   getFields() {
-    return ['targetTemp'];
+    return ['targetTemp', 'mode'];
   }
 }
 
@@ -21,28 +22,48 @@ class DateTimeSource {
     m.setHours(0,0,0,0);
     cb({
       time: d - m,
-      dotw: d.getDay()
+      day: d.getDay()
     });
   }
   getFields() {
-    return ['time', 'dotw'];
+    return ['time', 'day'];
   }
 }
 
 class WeatherSource {
-  constructor(location) {
-    this.forecast = new Forecast({
-      service: 'darksky',
-      key: 'db73b3e04c0d6aaa902b6f89315cf259',
-      units: 'fahrenheit',
-      cache: true,      // Cache API requests
-      ttl: {            // How long to cache requests. Uses syntax from moment.js: http://momentjs.com/docs/#/durations/creating/
-        minutes: 27,
-        seconds: 45
-      }
-    });
+  // TODO: unhardcode
+  constructor(apiKey, location) {
+    this.apiKey = '093fbcb663c1369fcc5dbbe4ba57a956';
+    this.location = '63124,us';
   }
   query(cb) {
+    const url = 'http://api.openweathermap.org/data/2.5/weather?'
+      + 'q=' + this.location
+      + '&appid=' + this.apiKey;
 
+    function format(d) {
+      return {
+        temp: d.main.temp,
+        humidity: d.main.humidity,
+        pressure: d.main.pressure,
+        wind: d.wind.speed,
+        clouds: d.clouds.all,
+        rain: d.rain ? d.rain['3h'] : 0,
+        snow: d.snow ? d.snow['3h'] : 0
+      }
+    }
+
+    request(url, (err, res, body) => {
+      cb(format(JSON.parse(body)));
+    });
+  }
+  getFields() {
+    return ['temp', 'humidity', 'pressure', 'wind', 'clouds', 'rain', 'snow'];
   }
 }
+
+module.exports = {
+  ThermostatSource: ThermostatSource,
+  DateTimeSource: DateTimeSource,
+  WeatherSource: WeatherSource
+};

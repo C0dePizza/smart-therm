@@ -42,12 +42,18 @@ class Thermostat {
   }
 
   updateLcd() {
-    this.lcd.clear();
+
     const s1 = 'OBS: ' + Math.round(this.current)
       + ', TGT: ' + Math.round(this.target);
     const s2 = (this.mode ? 'Auto' : 'Off') + ', ' + this.hvac.status;
-    this.lcd.println(s1, 1);
-    this.lcd.println(s2, 2);
+
+    if (s1+s2 != this.displayText) {
+      this.lcd.clear();
+      this.lcd.println(s1, 1);
+      this.lcd.println(s2, 2);
+    }
+
+    this.displayText = s1+s2;
   }
 
   updateHvac() {

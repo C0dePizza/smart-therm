@@ -11,9 +11,8 @@ class TempSensor {
     return this.fahrenheit ? temp*9/5+32 : temp;
   }
   read(cb) {
-    const f = this.fahrenheit;
     ds.get(this.sId, (err, temp) => {
-      if (f)
+      if (this.fahrenheit)
         temp = 9/5*temp + 32;
       cb(err, temp);
     })
