@@ -4,10 +4,12 @@ class ThermostatSource {
   constructor(thermostat) {
     this.thermostat = thermostat;
   }
-  query(cb) {
-    cb({
-      targetTemp: this.thermostat.target,
-      mode: this.thermostat.mode
+  query() {
+    return new Promise((resolve, reject) => {
+      resolve({
+        targetTemp: this.thermostat.target,
+        mode: this.thermostat.mode
+      });
     });
   }
   getFields() {
@@ -17,12 +19,14 @@ class ThermostatSource {
 
 class DateTimeSource {
   constructor() {}
-  query(cb) {
-    var d = new Date(), m = new Date();
-    m.setHours(0,0,0,0);
-    cb({
-      time: d - m,
-      day: d.getDay()
+  query() {
+    return new Promise((resolve, reject) => {
+      var d = new Date(), m = new Date();
+      m.setHours(0,0,0,0);
+      resolve({
+        time: d - m,
+        day: d.getDay()
+      });
     });
   }
   getFields() {
@@ -36,7 +40,8 @@ class WeatherSource {
     this.apiKey = '093fbcb663c1369fcc5dbbe4ba57a956';
     this.location = '63124,us';
   }
-  query(cb) {
+  query() {
+
     const url = 'http://api.openweathermap.org/data/2.5/weather?'
       + 'q=' + this.location
       + '&appid=' + this.apiKey;
@@ -53,8 +58,10 @@ class WeatherSource {
       }
     }
 
-    request(url, (err, res, body) => {
-      cb(format(JSON.parse(body)));
+    return new Promise((resolve, reject) => {
+      request(url, (err, res, body) => {
+        resolve(format(JSON.parse(body)));
+      });
     });
   }
   getFields() {
