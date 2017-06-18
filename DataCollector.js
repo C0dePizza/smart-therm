@@ -6,6 +6,7 @@ class DataCollector {
   constructor(sources) {
     this.sources = sources;
     this.dataFile = './data/data.json';
+    this.interval = 1000*60*30; // 30 mins
   }
 
   // collects data from all sources
@@ -29,6 +30,13 @@ class DataCollector {
         return fse.writeJson(this.dataFile, [dp]);
       });
     });
+  }
+
+  start() {
+    this.timeout = setInterval(this.collect.bind(this), this.interval);
+  }
+  stop() {
+    clearInterval(this.timeout);
   }
 }
 
